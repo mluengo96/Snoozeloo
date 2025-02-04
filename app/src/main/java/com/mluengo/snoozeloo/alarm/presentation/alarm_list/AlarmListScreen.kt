@@ -31,10 +31,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.mluengo.snoozeloo.ui.theme.LocalSpacing
 import com.mluengo.snoozeloo.ui.theme.SnoozelooTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AlarmListScreen(
     modifier: Modifier = Modifier,
+    viewModel: AlarmListViewModel = koinViewModel()
 ) {
     val spacing = LocalSpacing.current
     Scaffold(
