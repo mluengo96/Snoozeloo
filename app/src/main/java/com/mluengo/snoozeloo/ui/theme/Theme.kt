@@ -35,7 +35,8 @@ private val LightColorScheme = lightColorScheme(
 private val CustomLightColorScheme = lightColorScheme(
     primary = primary,
     background = background,
-    surface = surface
+    surface = surface,
+    onSurfaceVariant = onSurfaceVariant,
 )
 
 @Composable
