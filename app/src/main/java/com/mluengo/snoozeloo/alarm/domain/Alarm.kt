@@ -1,6 +1,6 @@
 package com.mluengo.snoozeloo.alarm.domain
 
-import java.time.LocalTime
+import kotlinx.datetime.LocalTime
 
 data class Alarm(
     val id: String,

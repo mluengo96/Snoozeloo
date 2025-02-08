@@ -1,5 +1,6 @@
 package com.mluengo.snoozeloo.alarm.presentation.alarm_list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.FabPosition
@@ -29,16 +31,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import com.mluengo.snoozeloo.alarm.domain.Alarm
+import com.mluengo.snoozeloo.alarm.presentation.models.toAlarmUi
+import com.mluengo.snoozeloo.core.presentation.util.timeLeft
+import com.mluengo.snoozeloo.core.presentation.util.toDisplayableTimeLeft
 import com.mluengo.snoozeloo.ui.theme.LocalSpacing
 import com.mluengo.snoozeloo.ui.theme.SnoozelooTheme
-import org.koin.androidx.compose.koinViewModel
+import kotlinx.datetime.LocalTime
 
 @Composable
 fun AlarmListScreen(
     modifier: Modifier = Modifier,
-    viewModel: AlarmListViewModel = koinViewModel()
+    state: AlarmListState
 ) {
     val spacing = LocalSpacing.current
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
@@ -61,21 +68,35 @@ fun AlarmListScreen(
         },
         floatingActionButtonPosition = FabPosition.Center
     ) { innerPadding ->
-        AlarmListContent(
-            modifier = Modifier
-                .statusBarsPadding()
-                .consumeWindowInsets(innerPadding)
-        )
+        if (state.isLoading) {
+
+        } else if (state.alarms.isEmpty()) {
+            AlarmEmptyContent()
+        } else {
+            AlarmListContent(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .consumeWindowInsets(innerPadding),
+                state = state
+            )
+        }
     }
 }
 
 @Composable
-fun AlarmListContent(modifier: Modifier = Modifier) {
+fun AlarmListContent(
+    modifier: Modifier = Modifier,
+    state: AlarmListState,
+) {
     val spacing = LocalSpacing.current
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(top = spacing.spaceLarge, start = spacing.spaceMedium, end = spacing.spaceMedium),
+            .padding(
+                top = spacing.spaceLarge,
+                start = spacing.spaceMedium,
+                end = spacing.spaceMedium
+            ),
     ) {
         Text(
             text = "Your Alarms",
@@ -88,7 +109,12 @@ fun AlarmListContent(modifier: Modifier = Modifier) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(spacing.spaceMedium)
         ) {
-            items(6) {
+            items(state.alarms) { alarm ->
+                val amPmMarker = alarm.displayTime.substringAfter(" ", "")
+                val time12H = alarm.displayTime
+
+                val timeLeft = timeLeft(alarm.time.hour, alarm.time.minute).toDisplayableTimeLeft()
+
                 ListItem(
                     modifier = Modifier
                         .clip(MaterialTheme.shapes.large)
@@ -97,7 +123,7 @@ fun AlarmListContent(modifier: Modifier = Modifier) {
                         },
                     overlineContent = {
                         Text(
-                            text = "Wake up",
+                            text = alarm.label,
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -108,12 +134,12 @@ fun AlarmListContent(modifier: Modifier = Modifier) {
                             verticalAlignment = Alignment.Bottom
                         ) {
                             Text(
-                                text = "10:00",
+                                text = time12H.removeSuffix(amPmMarker),
                                 style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                text = "AM",
+                                text = amPmMarker,
                                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
@@ -121,14 +147,14 @@ fun AlarmListContent(modifier: Modifier = Modifier) {
                     },
                     supportingContent = {
                         Text(
-                            text = "Alarm in 30min",
+                            text = "Alarm in $timeLeft",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     },
                     trailingContent = {
                         Switch(
-                            checked = true,
+                            checked = alarm.enabled,
                             onCheckedChange = { }
                         )
                     },
@@ -138,12 +164,38 @@ fun AlarmListContent(modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun AlarmEmptyContent(
+    modifier: Modifier = Modifier
+) {
+    Column {
+        Text(
+            text = "It's empty! Add the first alarm so you don't miss an important moment!",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun AlarmListScreenPreview() {
     SnoozelooTheme {
         AlarmListScreen(
+            state = AlarmListState(
+                alarms = (1..10).map {
+                    previewAlarm.copy(id = it.toString())
+                }
+            ),
             modifier = Modifier
+                .background(MaterialTheme.colorScheme.background),
         )
     }
 }
+
+internal val previewAlarm = Alarm(
+    id = "alarm",
+    label = "Wake up",
+    time = LocalTime(4, 40),
+    enabled = true
+).toAlarmUi()
