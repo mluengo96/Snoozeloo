@@ -8,18 +8,22 @@ import kotlinx.datetime.toLocalDateTime
 fun timeLeft(hour: Int, minute: Int): LocalTime {
     val now = Clock.System.now().toLocalDateTime(TimeZone.of("Europe/Madrid"))
     var hoursLeft = hour - now.hour
-    val minutesLeft: Int
 
     if (hoursLeft < 0) {
         hoursLeft += 24
     }
 
-    if (minute == 0) {
-        minutesLeft = 60 - now.minute
+    var minutesLeft: Int = if (minute == 0) {
+        60 - now.minute
     } else if (minute < now.minute) {
-        minutesLeft = now.minute - minute
+        now.minute - minute
     } else {
-        minutesLeft = minute - now.minute
+        minute - now.minute
+    }
+
+    if (minutesLeft == 60) {
+        minutesLeft = 0
+        hoursLeft += 1
     }
 
     return LocalTime(hoursLeft, minutesLeft)
