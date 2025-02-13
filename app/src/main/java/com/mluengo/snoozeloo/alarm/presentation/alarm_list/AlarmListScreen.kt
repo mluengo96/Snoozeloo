@@ -4,13 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,14 +46,13 @@ fun AlarmListScreen(
     val spacing = LocalSpacing.current
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.padding(horizontal = spacing.spaceMedium),
         containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { },
                 containerColor = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .padding(spacing.spaceSmall)
                     .wrapContentSize()
                     .clip(MaterialTheme.shapes.extraLarge)
             ) {
@@ -74,9 +72,9 @@ fun AlarmListScreen(
             AlarmEmptyContent()
         } else {
             AlarmListContent(
-                modifier = Modifier
-                    .statusBarsPadding()
+                modifier = modifier
                     .consumeWindowInsets(innerPadding),
+                contentPaddingValues = innerPadding,
                 state = state
             )
         }
@@ -86,80 +84,74 @@ fun AlarmListScreen(
 @Composable
 fun AlarmListContent(
     modifier: Modifier = Modifier,
+    contentPaddingValues: PaddingValues,
     state: AlarmListState,
 ) {
     val spacing = LocalSpacing.current
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(
-                top = spacing.spaceLarge,
-                start = spacing.spaceMedium,
-                end = spacing.spaceMedium
-            ),
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = contentPaddingValues,
+        verticalArrangement = Arrangement.spacedBy(spacing.spaceMedium)
     ) {
-        Text(
-            text = "Your Alarms",
-            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Spacer(modifier = Modifier.height(spacing.spaceLarge))
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(spacing.spaceMedium)
-        ) {
-            items(state.alarms) { alarm ->
-                val amPmMarker = alarm.displayTime.substringAfter(" ", "")
-                val time12H = alarm.displayTime
+        item {
+            Spacer(modifier = Modifier.height(spacing.spaceLarge))
+            Text(
+                text = "Your Alarms",
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
 
-                val timeLeft = timeLeft(alarm.time.hour, alarm.time.minute).toDisplayableTimeLeft()
+        items(state.alarms) { alarm ->
+            val amPmMarker = alarm.displayTime.substringAfter(" ", "")
+            val time12H = alarm.displayTime
 
-                ListItem(
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.large)
-                        .clickable {
+            val timeLeft = timeLeft(alarm.time.hour, alarm.time.minute).toDisplayableTimeLeft()
 
-                        },
-                    overlineContent = {
+            ListItem(
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.large)
+                    .clickable {
+
+                    },
+                overlineContent = {
+                    Text(
+                        text = alarm.label,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                },
+                headlineContent = {
+                    Row(
+                        modifier = Modifier.padding(vertical = spacing.spaceSmall),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
                         Text(
-                            text = alarm.label,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            text = time12H.removeSuffix(amPmMarker),
+                            style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
-                    },
-                    headlineContent = {
-                        Row(
-                            modifier = Modifier.padding(vertical = spacing.spaceSmall),
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            Text(
-                                text = time12H.removeSuffix(amPmMarker),
-                                style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = amPmMarker,
-                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                    },
-                    supportingContent = {
                         Text(
-                            text = "Alarm in $timeLeft",
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            text = amPmMarker,
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = alarm.enabled,
-                            onCheckedChange = { }
-                        )
-                    },
-                )
-            }
+                    }
+                },
+                supportingContent = {
+                    Text(
+                        text = "Alarm in $timeLeft",
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                trailingContent = {
+                    Switch(
+                        checked = alarm.enabled,
+                        onCheckedChange = { }
+                    )
+                },
+            )
         }
     }
 }
@@ -177,7 +169,7 @@ fun AlarmEmptyContent(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showSystemUi = true, device = "spec:parent=pixel_8", showBackground = true)
 @Composable
 private fun AlarmListScreenPreview() {
     SnoozelooTheme {
@@ -188,7 +180,7 @@ private fun AlarmListScreenPreview() {
                 }
             ),
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background),
+                .background(MaterialTheme.colorScheme.surfaceDim),
         )
     }
 }

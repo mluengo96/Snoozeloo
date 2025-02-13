@@ -26,6 +26,24 @@ class LocalAlarmDataSource() : AlarmDataSource {
                     time = LocalTime(9, 45),
                     enabled = true
                 ),
+                Alarm(
+                    id = "wakeup",
+                    label = "Wake up",
+                    time = LocalTime(12, 0),
+                    enabled = true
+                ),
+                Alarm(
+                    id = "meds",
+                    label = "Meds",
+                    time = LocalTime(0,30),
+                    enabled = false
+                ),
+                Alarm(
+                    id = "workout",
+                    label = "Workout",
+                    time = LocalTime(9, 45),
+                    enabled = true
+                ),
             )
         )
     }

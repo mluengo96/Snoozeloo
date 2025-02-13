@@ -27,8 +27,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             SnoozelooTheme(darkTheme = false, dynamicColor = false) {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.primary
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     val viewModel: AlarmListViewModel = koinViewModel()
                     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -41,18 +42,24 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun SnoozelooPreview() {
     SnoozelooTheme {
-        AlarmListScreen(
-            state = AlarmListState(
-                alarms = (1..10).map {
-                    previewAlarm.copy(id = it.toString())
-                }
-            ),
+        Surface(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background),
-        )
+                .fillMaxSize(),
+            color = MaterialTheme.colorScheme.surfaceDim
+        ) {
+            AlarmListScreen(
+                state = AlarmListState(
+                    alarms = (1..10).map {
+                        previewAlarm.copy(id = it.toString())
+                    }
+                ),
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceDim),
+            )
+        }
     }
 }
