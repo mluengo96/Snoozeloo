@@ -1,5 +1,6 @@
 package com.mluengo.snoozeloo.alarm.presentation.alarm_list
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,7 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -18,9 +20,11 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,8 +32,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.mluengo.snoozeloo.R
 import com.mluengo.snoozeloo.alarm.domain.Alarm
 import com.mluengo.snoozeloo.alarm.presentation.models.toAlarmUi
 import com.mluengo.snoozeloo.core.presentation.util.timeLeft
@@ -43,11 +51,10 @@ fun AlarmListScreen(
     modifier: Modifier = Modifier,
     state: AlarmListState
 ) {
-    val spacing = LocalSpacing.current
-
     Scaffold(
-        modifier = modifier.padding(horizontal = spacing.spaceMedium),
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { },
@@ -67,13 +74,11 @@ fun AlarmListScreen(
         floatingActionButtonPosition = FabPosition.Center
     ) { innerPadding ->
         if (state.isLoading) {
-
+            AlarmLoadingContent()
         } else if (state.alarms.isEmpty()) {
             AlarmEmptyContent()
         } else {
             AlarmListContent(
-                modifier = modifier
-                    .consumeWindowInsets(innerPadding),
                 contentPaddingValues = innerPadding,
                 state = state
             )
@@ -89,7 +94,7 @@ fun AlarmListContent(
 ) {
     val spacing = LocalSpacing.current
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.padding(horizontal = spacing.spaceMedium),
         contentPadding = contentPaddingValues,
         verticalArrangement = Arrangement.spacedBy(spacing.spaceMedium)
     ) {
@@ -160,11 +165,45 @@ fun AlarmListContent(
 fun AlarmEmptyContent(
     modifier: Modifier = Modifier
 ) {
-    Column {
+    val spacing = LocalSpacing.current
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(spacing.spaceLarge),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Image(
+            painter = painterResource(R.drawable.alarm),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
+            contentDescription = "Alarm icon"
+        )
+        Spacer(modifier = Modifier.height(spacing.spaceLarge))
         Text(
             text = "It's empty! Add the first alarm so you don't miss an important moment!",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun AlarmLoadingContent(
+    modifier: Modifier = Modifier
+) {
+    val spacing = LocalSpacing.current
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(spacing.spaceLarge),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        LinearProgressIndicator(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
 }
@@ -179,6 +218,30 @@ private fun AlarmListScreenPreview() {
                     previewAlarm.copy(id = it.toString())
                 }
             ),
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceDim),
+        )
+    }
+}
+
+@Preview(showSystemUi = true, device = "spec:parent=pixel_8", showBackground = true)
+@Composable
+private fun AlarmListScreenEmptyPreview() {
+    SnoozelooTheme {
+        AlarmListScreen(
+            state = AlarmListState(),
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceDim),
+        )
+    }
+}
+
+@Preview(showSystemUi = true, device = "spec:parent=pixel_8", showBackground = true)
+@Composable
+private fun AlarmListScreenLoadingPreview() {
+    SnoozelooTheme {
+        AlarmListScreen(
+            state = AlarmListState(isLoading = true),
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surfaceDim),
         )
