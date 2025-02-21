@@ -11,15 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Blue50,
-    secondary = Blue50,
-    tertiary = Blue50
+    primary = Purple80,
+    secondary = PurpleGrey80,
+    tertiary = Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Blue50,
-    secondary = Blue50,
-    tertiary = Blue50
+    primary = Purple40,
+    secondary = PurpleGrey40,
+    tertiary = Pink40
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -30,6 +30,13 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
     */
+)
+
+private val CustomLightColorScheme = lightColorScheme(
+    primary = primary,
+    background = background,
+    surface = surface,
+    onSurfaceVariant = onSurfaceVariant,
 )
 
 @Composable
@@ -46,7 +53,7 @@ fun SnoozelooTheme(
         }
 
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> CustomLightColorScheme
     }
 
     MaterialTheme(
